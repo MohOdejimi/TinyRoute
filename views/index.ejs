@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" 
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" 
+    crossorigin="anonymous" 
+    referrerpolicy="no-referrer" 
+  />
+  <link href="/css/main.css" rel="stylesheet">
+  <title>TinyRoute</title>
+</head>
+<body>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+      <h1 class="logo"><i class="fa-solid fa-link"></i> TinyRoute</h1>
+      <ul class="nav-links">
+        <% if (user) { %>
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/logout">Logout</a></li>
+        <% } else { %>
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Sign Up</a></li>
+        <% } %>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>Shorten Your Links Instantly</h2>
+      <p>Make your URLs clean, shareable, and memorable with TinyRoute.</p>
+      <form action="/shorten" method="POST" class="url-form">
+        <input type="url" name="originalUrl" placeholder="Paste your long URL here..." required>
+        <button id = "BtnShortener" type="submit"><i class="fa-solid fa-scissors"></i> Shorten</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Results Section -->
+  <section class="results">
+    <% if (shortUrl) { %>
+      <div class="result-box">
+        <p>Your shortened link:</p>
+        <a href="<%= shortUrl %>" target="_blank"><%= shortUrl %></a>
+      </div>
+    <% } %>
+  </section>
+
+  <!-- Dashboard Preview (if logged in) -->
+  <% if (user && urls && urls.length > 0) { %>
+    <section class="dashboard-preview">
+      <h3>Your Recent Links</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Original URL</th>
+            <th>Short URL</th>
+            <th>Clicks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% urls.forEach(url => { %>
+            <tr>
+              <td><%= url.full %></td>
+              <td><a href="<%= url.short %>" target="_blank"><%= url.short %></a></td>
+              <td><%= url.clicks %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <a href="/dashboard" class="btn">View Full History</a>
+    </section>
+  <% } %>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; TinyRoute 2025. All rights reserved.</p>
+    <div class="socials">
+      <a href="https://www.linkedin.com/in/mohodejimi/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+      <a href="https://github.com/MohOdejimi" target="_blank"><i class="fa-brands fa-github"></i></a>
+      <a href="https://twitter.com/MohOdejimi" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+    </div>
+  </footer>
+
+  <script src="/js/client.js"></script>
+</body>
+</html>
