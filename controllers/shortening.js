@@ -3,25 +3,47 @@ import Url from '../models/urls.js';
 import Counter from '../models/counters.js';
 import base62 from 'base62'
 
+
+
+async function updateOrCreateeCounter() {
+    let doc = await Counter.findOne()
+    return doc
+}
+
 export const shortenUrl = async (req, res) => {
     try {
         const originalUrl = normalizeUrl(req.body.originalUrl);
         console.log("Original URL:", originalUrl);
+        let counter;
+        let encodedString
 
-        const counter = await Counter.findOneAndUpdate(
-            { name: 'url_counter' },
-            { $inc: { currentCount: 1024 } },
-            { new: true, upsert: true }
-        );
+        const singleTon = await updateOrCreateeCounter();
+        console.log("Counter Document:", singleTon);
+        if(singleTon) {
+            singleTon.counter += process.env.INCREMENT_BY 
+            await singleTon.save()
+            counter = singleTon.counter
+            encodedString = base62.encode(counter);
+            console.log("Counter Updated to:", singleTon.counter);
+        } else {
+            const newCounter = new Counter({ 
+                name: 'url_counter', 
+                counter: (parseInt(process.env.DEFAULT_COUNTER) + parseInt(process.env.INCREMENT_BY))
+            });
+            await newCounter.save()
+            counter = newCounter.counter
+            encodedString = base62.encode(counter);
+            console.log("Counter Created with value:", newCounter.counter);
+        }
 
-        const uniqueNumber = counter.currentCount
-        const encodedString = base62.encode(uniqueNumber)
+        console.log("Encoded String:", encodedString);
+        const newURLdocument = new Url({
+            originalUrl: originalUrl,
+            shortCode: encodedString
+        })
+        await newURLdocument.save()
+        console.log("New URL Document Saved:", newURLdocument);
 
-        console.log("Unique Number for Short Code:", uniqueNumber);
-        console.log("Encoded Short Code:", encodedString);
-
-        const shortUrl = "http://tinyRoute.ly/" + encodedString;
-        console.log("Generated Short URL:", shortUrl);
     } catch (error) {
         console.error(error);
     }

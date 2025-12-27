@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: './config/.env' });
+
 import mongoose from 'mongoose'
 
 const counterSchema = new mongoose.Schema({
@@ -6,10 +9,9 @@ const counterSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    currentCount : {
+    counter : {
         type: Number,
         required: true,
-        default: 1024
     }
 })
 
