@@ -1,1 +1,0 @@
-const btnShortener = document.getElementById('BtnShortener');

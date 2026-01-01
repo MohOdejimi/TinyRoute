@@ -2,7 +2,38 @@ import dotenv from 'dotenv';
 dotenv.config({ path: './config/.env' });
 
 import express from 'express';
+import session from 'express-session';
+import MongoStore from 'connect-mongo'; 
 const app = express()
+
+const store = MongoStore.create({
+    mongoUrl: process.env.DB_STRING,
+    collectionName: 'sessions'
+})
+
+// Session configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,   
+  store: store,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 100, 
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'  
+  }
+}));
+
+//session middlewarre 
+app.use((req, res, next) => {
+  if (!req.session.initialized) {
+    req.session.initialized = true;
+    req.session.createdAt = new Date()
+  }
+  req.session.lastAccessed = new Date()
+  next()
+})
+
 
 // Middleware
 app.set('view engine','ejs')
