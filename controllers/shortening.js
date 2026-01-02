@@ -31,6 +31,7 @@ export const shortenUrl = async (req, res) => {
         })
 
         await newUrl.save();
+        res.status(201).redirect('/')
 
     } catch (error) {
         console.error(error);

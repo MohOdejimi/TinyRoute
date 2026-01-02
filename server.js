@@ -48,10 +48,13 @@ connectDB()
 // Routes
 import mainRoutes from './routes/main.js'
 import shorteningRoutes from './routes/shortening.js'
+import urlRoutes from './routes/urlRoutes.js'
+
 
 // Routes Implementation
 app.use("/", mainRoutes)
 app.use('/shorten', shorteningRoutes)
+app.use('/:shortCode', urlRoutes)
 
 app.listen(process.env.PORT || 5050, () => {
     console.log(`Server is running at port ${process.env.PORT || 5050}`)

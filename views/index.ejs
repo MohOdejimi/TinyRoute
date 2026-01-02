@@ -11,20 +11,20 @@
     referrerpolicy="no-referrer" 
   />
   <link href="/css/main.css" rel="stylesheet">
-  <title>TinyRoute</title>
+  <title>TinyRoute - URL Shortener</title>
 </head>
 <body>
   <!-- Navbar -->
   <header>
-    <nav class="navbar">
+    <nav class="navbar container">
       <h1 class="logo"><i class="fa-solid fa-link"></i> TinyRoute</h1>
       <ul class="nav-links">
         <% if (user) { %>
-          <li><a href="/dashboard">Dashboard</a></li>
-          <li><a href="/logout">Logout</a></li>
+          <li><a href="/dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+          <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
         <% } else { %>
-          <li><a href="/login">Login</a></li>
-          <li><a href="/register">Sign Up</a></li>
+          <li><a href="/login"><i class="fa-solid fa-right-to-bracket"></i> Login</a></li>
+          <li><a href="/register"><i class="fa-solid fa-user-plus"></i> Sign Up</a></li>
         <% } %>
       </ul>
     </nav>
@@ -37,57 +37,111 @@
       <p>Make your URLs clean, shareable, and memorable with TinyRoute.</p>
       <form action="/shorten" method="POST" class="url-form">
         <input type="url" name="originalUrl" placeholder="Paste your long URL here..." required>
-        <button id = "BtnShortener" type="submit"><i class="fa-solid fa-scissors"></i> Shorten</button>
+        <button id="BtnShortener" type="submit">
+          <i class="fa-solid fa-scissors"></i> Shorten
+        </button>
       </form>
     </div>
   </section>
 
-  <!-- Results Section -->
-  <section class="results">
-    <% if (shortUrl) { %>
-      <div class="result-box">
-        <p>Your shortened link:</p>
-        <a href="<%= shortUrl %>" target="_blank"><%= shortUrl %></a>
-      </div>
-    <% } %>
-  </section>
+  <!-- URL Display Section -->
+  <section class="urls-section">
+    <div class="container">
+      <% if (shortUrls && shortUrls.length > 0) { %>
+        <div class="urls-header">
+          <h3><i class="fa-solid fa-clock-rotate-left"></i> Your Shortened URLs</h3>
+          <span class="url-count"><%= shortUrls.length %> link<%= shortUrls.length !== 1 ? 's' : '' %></span>
+        </div>
 
-  <!-- Dashboard Preview (if logged in) -->
-  <% if (user && urls && urls.length > 0) { %>
-    <section class="dashboard-preview">
-      <h3>Your Recent Links</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Original URL</th>
-            <th>Short URL</th>
-            <th>Clicks</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% urls.forEach(url => { %>
-            <tr>
-              <td><%= url.full %></td>
-              <td><a href="<%= url.short %>" target="_blank"><%= url.short %></a></td>
-              <td><%= url.clicks %></td>
-            </tr>
+        <div class="urls-grid">
+          <% shortUrls.forEach(url => { %>
+            <div class="url-card">
+              <div class="url-card-header">
+                <div class="url-favicon">
+                  <% 
+                    let favicon = '';
+                    let domain = '';
+                    try {
+                      const urlObj = new URL(url.originalUrl);
+                      domain = urlObj.hostname.replace('www.', '');
+                      favicon = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=32`;
+                    } catch(e) {
+                      domain = 'Invalid URL';
+                    }
+                  %>
+                  <% if (favicon) { %>
+                    <img src="<%= favicon %>" alt="<%= domain %>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <i class="fa-solid fa-link" style="display:none;"></i>
+                  <% } else { %>
+                    <i class="fa-solid fa-link"></i>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Card Body -->
+              <div class="url-card-body">
+                <!-- Short URL -->
+                <div class="url-section">
+                  <label>Short URL</label>
+                  <a href="/<%= url.shortCode %>" target="_blank" class="short-url">
+                    <%= req.protocol %>://<%= req.get('host') %>/<%= url.shortCode %>
+                  </a>
+                </div>
+
+                <!-- Original URL -->
+                <div class="url-section">
+                  <label>Original URL</label>
+                  <p class="original-url" title="<%= url.originalUrl %>">
+                    <%= url.originalUrl %>
+                  </p>
+                </div>
+
+                <!-- Meta Info -->
+                <div class="url-meta">
+                  <span class="date">
+                    <i class="fa-solid fa-calendar"></i>
+                    <%= new Date(url.createdAt).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    }) %>
+                  </span>
+                </div>
+              </div>
+            </div>
           <% }) %>
-        </tbody>
-      </table>
-      <a href="/dashboard" class="btn">View Full History</a>
-    </section>
-  <% } %>
+        </div>
+
+      <% } else { %>
+        <!-- No URLs - show empty state -->
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fa-solid fa-link-slash"></i>
+          </div>
+          <h3>No URLs Yet</h3>
+          <p>Start by shortening your first URL above!</p>
+        </div>
+      <% } %>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer>
-    <p>&copy; TinyRoute 2025. All rights reserved.</p>
-    <div class="socials">
-      <a href="https://www.linkedin.com/in/mohodejimi/" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
-      <a href="https://github.com/MohOdejimi" target="_blank"><i class="fa-brands fa-github"></i></a>
-      <a href="https://twitter.com/MohOdejimi" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+    <div class="container">
+      <p>&copy; TinyRoute <%= new Date().getFullYear() %>. All rights reserved.</p>
+      <div class="socials">
+        <a href="https://www.linkedin.com/in/mohodejimi/" target="_blank" title="LinkedIn">
+          <i class="fa-brands fa-linkedin"></i>
+        </a>
+        <a href="https://github.com/MohOdejimi" target="_blank" title="GitHub">
+          <i class="fa-brands fa-github"></i>
+        </a>
+        <a href="https://twitter.com/MohOdejimi" target="_blank" title="Twitter">
+          <i class="fa-brands fa-x-twitter"></i>
+        </a>
+      </div>
     </div>
   </footer>
-
-  <script src="js\client.js"></script>
+  <script src="/js/client.js"></script>
 </body>
 </html>
