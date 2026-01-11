@@ -6,6 +6,12 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo'; 
 const app = express()
 
+// Middleware
+app.set('view engine','ejs')
+app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
 const store = MongoStore.create({
     mongoUrl: process.env.DB_STRING,
     collectionName: 'sessions'
@@ -15,7 +21,7 @@ const store = MongoStore.create({
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,   
+  saveUninitialized: false,   
   store: store,
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 100, 
@@ -34,12 +40,10 @@ app.use((req, res, next) => {
   next()
 })
 
-
-// Middleware
-app.set('view engine','ejs')
-app.use(express.static('public'))
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - SessionID: ${req.sessionID || 'none'}`);
+  next();
+});
 
 // Database
 import connectDB from './config/db.js'
